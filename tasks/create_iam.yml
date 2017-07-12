@@ -1,0 +1,21 @@
+- name: Create a new IAM role
+  iam:
+    region: "{{ region }}"
+    profile: "{{ aws_account_name }}"
+    iam_type: role
+    name: "{{ iam_role_name }}"
+    path: '/'
+    state: present
+  register: iam_result
+
+- name: Create and attach instance_role_policies
+  iam_policy:
+    region: "{{ region }}"
+    profile: "{{ aws_account_name }}"
+    iam_type: role
+    iam_name: "{{ iam_role_name }}"
+    policy_name: "{{ item }}"
+    #policy_document: '{{ playbook_dir }}/variable_files/iam_policies/{{ item }}.json'
+    policy_json: "{{lookup( 'template', '{{inventory_dir}}/../variable_files/iam_policies/{{item}}.json')}}"
+    state: present
+  with_items: "{{ iam_policies }}"
