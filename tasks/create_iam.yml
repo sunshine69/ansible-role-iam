@@ -1,11 +1,11 @@
 - name: Create a new IAM role
-  iam:
+  iam_role:
     region: "{{ region }}"
     profile: "{{ aws_account_name }}"
-    iam_type: role
     name: "{{ iam_role_name }}"
     path: '/'
     state: present
+    assume_role_policy_document: "{{ lookup('file', 'ec2-trust-policy.json') }}"
   register: iam_result
 
 - name: Create and attach instance_role_policies
@@ -14,8 +14,23 @@
     profile: "{{ aws_account_name }}"
     iam_type: role
     iam_name: "{{ iam_role_name }}"
-    policy_name: "{{ item }}"
-    #policy_document: '{{ playbook_dir }}/variable_files/iam_policies/{{ item }}.json'
-    policy_json: "{{lookup( 'template', '{{inventory_dir}}/../variable_files/iam_policies/{{item}}.json')}}"
+    policy_name: "{{ iam_policy_name }}"
+    policy_json: "{{lookup( 'template', '{{inventory_dir}}/../variable_files/iam_policies/{{ iam_policy_name }}.json')}}"
     state: present
-  with_items: "{{ iam_policies }}"
+
+- name: grant iam role access to credstash key
+  kms:
+    alias: credstash
+    region: "{{ region }}"
+    profile: "{{ profile|default(omit) }}"
+    description: credstash
+    state: present
+    grants:
+      - operations:
+          - Decrypt
+        constraints:
+          encryption_context_equals:
+            Application: "{{ role_type }}"
+            Environment: "{{ env }}"
+        name: "{{ role_type }}-{{ env }}-encryption-context"
+        grantee_principal: "{{ iam_result.iam_role.arn }}"
