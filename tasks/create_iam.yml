@@ -8,6 +8,13 @@
     assume_role_policy_document: "{{ lookup('file', 'ec2-trust-policy.json') }}"
   register: iam_result
 
+- name: set policy_file fact
+  set_fact:
+    iam_policy_file: "{{ item }}"
+  with_first_found:
+    - '{{ inventory_dir }}/../variable_files/iam_policies/{{ iam_policy_name }}.json'
+    - '{{ inventory_dir }}/../variable_files/iam_policies/minimum-ec2.json'
+
 - name: Create and attach instance_role_policies
   iam_policy:
     region: "{{ region }}"
@@ -15,7 +22,7 @@
     iam_type: role
     iam_name: "{{ iam_role_name }}"
     policy_name: "{{ iam_policy_name }}"
-    policy_json: "{{lookup( 'template', '{{inventory_dir}}/../variable_files/iam_policies/{{ iam_policy_name }}.json')}}"
+    policy_json: "{{ lookup('template', '{{ iam_policy_file }}') }}"
     state: present
 
 - name: grant iam role access to credstash key
