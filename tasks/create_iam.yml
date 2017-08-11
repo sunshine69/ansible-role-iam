@@ -41,3 +41,4 @@
             Environment: "{{ env }}"
         name: "{{ role_type }}-{{ env }}-encryption-context"
         grantee_principal: "{{ iam_result.iam_role.arn }}"
+  when: iam_credstash_enabled
