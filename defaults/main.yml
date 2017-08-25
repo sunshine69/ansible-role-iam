@@ -1,3 +1,5 @@
 stage: create
 iam_role_name: "{{ vpc_name }}_{{ role_type }}"
 iam_credstash_enabled: no
+# List of managed policies (arn)
+iam_managed_policies: []

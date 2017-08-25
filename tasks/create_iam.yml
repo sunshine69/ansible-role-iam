@@ -6,6 +6,7 @@
     path: '/'
     state: present
     assume_role_policy_document: "{{ lookup('file', 'ec2-trust-policy.json') }}"
+    managed_policy: "{{ iam_managed_policies|default([]) }}"
   register: iam_result
 
 - name: set policy_file fact
