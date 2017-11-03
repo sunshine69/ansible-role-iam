@@ -1,1 +1,1 @@
-- include: "{{stage}}_iam.yml"
+- include_tasks: "{{stage}}_iam.yml"

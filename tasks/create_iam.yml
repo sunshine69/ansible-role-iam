@@ -27,7 +27,7 @@
     state: present
 
 - name: grant iam role access to credstash key
-  kms:
+  aws_kms:
     alias: credstash
     region: "{{ region }}"
     profile: "{{ profile|default(omit) }}"
