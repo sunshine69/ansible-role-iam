@@ -1,7 +1,9 @@
+- include_tasks: lookup_policy_file.yml
+
 - name: Create a new IAM role
   iam_role:
     region: "{{ region }}"
-    profile: "{{ aws_account_name }}"
+    profile: "{{ profile|default(aws_account_name) }}"
     name: "{{ iam_role_name }}"
     path: '/'
     state: present
@@ -13,20 +15,13 @@
   pause: seconds=10
   when: iam_result.changed
 
-- name: set policy_file fact
-  set_fact:
-    iam_policy_file: "{{ item }}"
-  with_first_found:
-    - '{{ inventory_dir }}/../variable_files/iam_policies/{{ iam_policy_name }}.json'
-    - '{{ inventory_dir }}/../variable_files/iam_policies/minimum-ec2.json'
-
 - name: Create and attach instance_role_policies
   iam_policy:
     region: "{{ region }}"
-    profile: "{{ aws_account_name }}"
+    profile: "{{ profile|default(aws_account_name) }}"
     iam_type: role
     iam_name: "{{ iam_role_name }}"
-    policy_name: "{{ iam_policy_name }}"
+    policy_name: "{{ iam_policy_name|default('minimum-ec2') }}"
     policy_json: "{{ lookup('template', '{{ iam_policy_file }}') }}"
     state: present
 
@@ -46,4 +41,4 @@
             Environment: "{{ env }}"
         name: "{{ role_type }}-{{ env }}-encryption-context"
         grantee_principal: "{{ iam_result.iam_role.arn }}"
-  when: iam_credstash_enabled
+  when: iam_credstash_enabled|default()

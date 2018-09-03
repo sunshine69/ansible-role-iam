@@ -1,0 +1,7 @@
+- name: set policy_file fact
+  set_fact:
+    iam_policy_file: "{{ item }}"
+  with_first_found:
+    - '{{ inventory_dir }}/../variable_files/iam_policies/{{ iam_policy_name|default("") }}.json'
+    - '{{ inventory_dir }}/../variable_files/iam_policies/minimum-ec2.json'
+    - '{{ playbook_dir }}/iam_policies/minimum-ec2.json'
