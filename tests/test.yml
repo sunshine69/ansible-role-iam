@@ -1,5 +1,17 @@
----
+# ansible-playbook % -e 'profile=xvt_sandbox env=sbi role_type=webserver' -vv
 - hosts: localhost
-  remote_user: root
-  roles:
-    - iam
+  vars:
+    iam_role_name: anisble-role-test-iam
+    region: ap-southeast-2
+  pre_tasks:
+    - debug:
+        var: playbook_dir
+  tasks:
+    - include_role:
+        name: iam
+      vars:
+        stage: create
+    - include_role:
+        name: iam
+      vars:
+        stage: delete

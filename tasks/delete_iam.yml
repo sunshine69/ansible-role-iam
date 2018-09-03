@@ -1,0 +1,21 @@
+- include_tasks: lookup_policy_file.yml
+
+- name: Delete instance_role_policies
+  iam_policy:
+    region: "{{ region }}"
+    profile: "{{ profile|default(aws_account_name) }}"
+    iam_type: role
+    iam_name: "{{ iam_role_name }}"
+    policy_name: "{{ iam_policy_name|default('minimum-ec2') }}"
+    policy_json: "{{ lookup('template', '{{ iam_policy_file }}') }}"
+    state: absent
+
+- name: Delete a IAM role
+  iam_role:
+    region: "{{ region }}"
+    profile: "{{ profile|default(aws_account_name) }}"
+    name: "{{ iam_role_name }}"
+    path: '/'
+    state: absent
+    assume_role_policy_document: "{{ lookup('file', 'ec2-trust-policy.json') }}"
+  register: iam_result
